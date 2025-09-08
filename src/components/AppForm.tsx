@@ -5,17 +5,19 @@ function AppForm() {
     date: new Date().toISOString().split("T")[0],
     startingCash: "",
     totalExpenses: 0,
-    endDayCash: "",
+    dailyIncome: "",
   });
 
   const [expenses, setExpenses] = useState([
     { id: 1, category: "Supplies", description: "", amount: "" },
   ]);
 
+  const webhookUrlEnv = import.meta.env.DEV
+    ? import.meta.env.VITE_DEV_WEBHOOK_URL
+    : import.meta.env.VITE_PROD_WEBHOOK_URL;
+
   const [isLoading, setIsLoading] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState(
-    "https://n8n-service.up.railway.app/webhook-test/49b00cf8-9f39-4ac6-87fb-5550459e1137"
-  );
+  const [webhookUrl, setWebhookUrl] = useState(webhookUrlEnv);
 
   const categories = [
     "Supplies",
@@ -61,13 +63,18 @@ function AppForm() {
   };
 
   const calculateTotal = () => {
-    return expenses.reduce((sum, expense) => {
-      return sum + (parseFloat(expense.amount) || 0);
-    }, 0);
+    return (
+      (parseFloat(formData.startingCash) || 0) +
+      (parseFloat(formData.dailyIncome) || 0) -
+      expenses.reduce((sum, expense) => {
+        return sum + (parseFloat(expense.amount) || 0);
+      }, 0)
+    );
   };
 
   const handleSave = async () => {
     // Validation
+    console.log(import.meta.env);
     if (!formData.date || !formData.startingCash) {
       console.log(formData);
       return;
@@ -83,7 +90,7 @@ function AppForm() {
     const reportData = {
       date: formData.date,
       startingCash: parseFloat(formData.startingCash),
-      endDayCash: parseFloat(formData.endDayCash),
+      dailyIncome: parseFloat(formData.dailyIncome),
       expenses: expenses.map((expense) => ({
         category: expense.category,
         description: expense.description,
@@ -134,7 +141,7 @@ function AppForm() {
       date: new Date().toISOString().split("T")[0],
       startingCash: "",
       totalExpenses: 0,
-      endDayCash: "",
+      dailyIncome: "",
     });
     setExpenses([{ id: 1, category: "Supplies", description: "", amount: "" }]);
   };
@@ -144,13 +151,12 @@ function AppForm() {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-t-xl shadow-sm p-6 border-b border-gray-200">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3">
             <Coffee className="text-amber-600" size={32} />
             <h1 className="text-2xl font-bold text-gray-800">
-              Cafe Daily Report
+              Termos Cafe Report
             </h1>
           </div>
-          <p className="text-gray-600">Track your daily income and expenses</p>
         </div>
 
         <div className="bg-white shadow-lg rounded-b-xl">
@@ -195,14 +201,14 @@ function AppForm() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
-                Сумма на конец дня
+                Приход за день грн.
               </label>
               <div className="relative">
                 <input
                   type="number"
-                  value={formData.endDayCash}
+                  value={formData.dailyIncome}
                   onChange={(e) =>
-                    handleInputChange("endDayCash", e.target.value)
+                    handleInputChange("dailyIncome", e.target.value)
                   }
                   placeholder="0.00"
                   step="0.01"
@@ -217,9 +223,7 @@ function AppForm() {
           {/* Expenses Section */}
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Daily Expenses
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-800">Расход</h2>
               <button
                 onClick={addExpenseRow}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm cursor-pointer"
@@ -235,18 +239,16 @@ function AppForm() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gray-100">
-                      <th className="px-3 py-3 text-left text-sm font-semibold text-gray-700 w-1/4">
+                      <th className="px-3 py-3 text-left text-sm font-semibold text-gray-700 w-3/12">
                         Категория
                       </th>
-                      <th className="px-3 py-3 text-left text-sm font-semibold text-gray-700 w-2/5">
+                      <th className="px-3 py-3 text-left text-sm font-semibold text-gray-700 w-6/12">
                         Описание
                       </th>
-                      <th className="px-3 py-3 text-left text-sm font-semibold text-gray-700 w-1/4">
+                      <th className="px-3 py-3 text-left text-sm font-semibold text-gray-700 w-2/12">
                         Сумма (грн.)
                       </th>
-                      <th className="px-3 py-3 text-center text-sm font-semibold text-gray-700 w-16">
-                        Действие
-                      </th>
+                      <th className="px-2 py-3 text-center text-sm font-semibold text-gray-700 w-1/12"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -308,7 +310,7 @@ function AppForm() {
                             />
                           </div>
                         </td>
-                        <td className="px-2 py-3 text-center">
+                        <td className="px-1 py-3 text-center">
                           <button
                             onClick={() => removeExpenseRow(expense.id)}
                             disabled={expenses.length === 1}
@@ -330,7 +332,9 @@ function AppForm() {
               <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-4 rounded-lg shadow-lg">
                 <div className="flex items-center gap-2 mb-1">
                   <Calculator size={18} />
-                  <span className="text-sm font-medium">Общие расходы</span>
+                  <span className="text-sm font-medium">
+                    Сумма на конец дня
+                  </span>
                 </div>
                 <div className="text-2xl font-bold">
                   {calculateTotal().toFixed(2)} грн.
