@@ -17,7 +17,7 @@ function AppForm() {
     : import.meta.env.VITE_PROD_WEBHOOK_URL;
 
   const [isLoading, setIsLoading] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState(webhookUrlEnv);
+  const [webhookUrl] = useState(webhookUrlEnv);
 
   const categories = [
     "Supplies",
