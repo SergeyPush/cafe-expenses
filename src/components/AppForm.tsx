@@ -1,5 +1,7 @@
 import { Plus, X, Calculator, Coffee } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchPreviousExpenses } from "../api/webhook-api";
+
 function AppForm() {
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split("T")[0],
@@ -8,8 +10,10 @@ function AppForm() {
     dailyIncome: "",
   });
 
+  const [previousExpenses, setPreviousExpenses] = useState<number | null>(null);
+
   const [expenses, setExpenses] = useState([
-    { id: 1, category: "Supplies", description: "", amount: "" },
+    { id: 1, category: "Закупка Продуктов", description: "", amount: "" },
   ]);
 
   const webhookUrlEnv = import.meta.env.DEV
@@ -19,16 +23,26 @@ function AppForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [webhookUrl] = useState(webhookUrlEnv);
 
+  useEffect(() => {
+    const loadPreviousExpenses = async () => {
+      const previous = await fetchPreviousExpenses();
+      setPreviousExpenses(previous || 0);
+    };
+
+    loadPreviousExpenses();
+  }, []);
+
   const categories = [
-    "Supplies",
-    "Food & Beverages",
-    "Equipment",
-    "Utilities",
-    "Staff Wages",
-    "Rent",
-    "Marketing",
-    "Maintenance",
-    "Other",
+    "Закупка Продуктов",
+    "Закупка Дессертов",
+    "Закупка Молока",
+    "Закупка Кофе",
+    "Закупка Посуды",
+    "На руки",
+    "Аренда",
+    "Реклама",
+    "Коммуналка",
+    "Прочее",
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -41,7 +55,7 @@ function AppForm() {
   const addExpenseRow = () => {
     const newExpense = {
       id: Date.now(),
-      category: "Supplies",
+      category: "Закупка Продуктов",
       description: "",
       amount: "",
     };
@@ -74,16 +88,22 @@ function AppForm() {
 
   const handleSave = async () => {
     // Validation
-    console.log(import.meta.env);
-    if (!formData.date || !formData.startingCash) {
-      console.log(formData);
-      return;
-    }
+    // if (!formData.date || !formData.startingCash) {
+    //   // return;
+    // }
+    console.log(formData);
 
-    const incompleteExpenses = expenses.filter((expense) => !expense.amount);
+    const incompleteExpenses = expenses.filter(
+      (expense) => parseFloat(expense.amount) < 1.0
+    );
+    console.log(incompleteExpenses);
 
-    if (incompleteExpenses.length > 0) {
-      alert("Please complete all expense entries or remove empty ones");
+    if (
+      incompleteExpenses.length > 0 ||
+      !parseFloat(formData.dailyIncome) ||
+      !parseFloat(formData.startingCash)
+    ) {
+      alert("Нужно заполнить все поля!");
       return;
     }
 
@@ -99,13 +119,6 @@ function AppForm() {
       totalExpenses: calculateTotal(),
     };
 
-    console.log("Daily Report Data:", reportData);
-    alert(
-      `Daily report saved successfully!\nTotal expenses: $${calculateTotal().toFixed(
-        2
-      )}`
-    );
-
     setIsLoading(true);
 
     try {
@@ -119,11 +132,10 @@ function AppForm() {
 
       if (response.ok) {
         alert(
-          `Daily report sent successfully!\nTotal expenses: $${calculateTotal().toFixed(
+          `Daily report sent successfully!\nTotal expenses: ${calculateTotal().toFixed(
             2
           )}`
         );
-        console.log("Report sent successfully:", reportData);
       } else {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -143,14 +155,16 @@ function AppForm() {
       totalExpenses: 0,
       dailyIncome: "",
     });
-    setExpenses([{ id: 1, category: "Supplies", description: "", amount: "" }]);
+    setExpenses([
+      { id: 1, category: "Закупка Продуктов", description: "", amount: "" },
+    ]);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 p-4 text-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 md:p-4 text-gray-900">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-t-xl shadow-sm p-6 border-b border-gray-200">
+        <div className="bg-white rounded-t-xl shadow-sm p-3 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <Coffee className="text-amber-600" size={32} />
             <h1 className="text-2xl font-bold text-gray-800">
@@ -161,10 +175,7 @@ function AppForm() {
 
         <div className="bg-white shadow-lg rounded-b-xl">
           {/* Basic Information Section */}
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-              Общая информация
-            </h2>
+          <div className="p-5 border-b border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -221,7 +232,7 @@ function AppForm() {
           </div>
 
           {/* Expenses Section */}
-          <div className="p-6">
+          <div className="p-5">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-semibold text-gray-800">Расход</h2>
               <button
@@ -246,7 +257,7 @@ function AppForm() {
                         Описание
                       </th>
                       <th className="px-3 py-3 text-left text-sm font-semibold text-gray-700 w-2/12">
-                        Сумма (грн.)
+                        Сумма
                       </th>
                       <th className="px-2 py-3 text-center text-sm font-semibold text-gray-700 w-1/12"></th>
                     </tr>
@@ -327,17 +338,35 @@ function AppForm() {
               </div>
             </div>
 
-            {/* Total Section */}
-            <div className="mt-6 flex justify-end">
-              <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-4 rounded-lg shadow-lg">
-                <div className="flex items-center gap-2 mb-1">
-                  <Calculator size={18} />
-                  <span className="text-sm font-medium">
-                    Сумма на конец дня
-                  </span>
+            <div className="flex justify-end flex-row gap-4">
+              {previousExpenses && (
+                <div className="mt-6 flex justify-end">
+                  <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg shadow-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Calculator size={18} />
+                      <span className="text-sm font-medium">
+                        Сумма за вчерашний день
+                      </span>
+                    </div>
+                    <div className="text-2xl font-bold">
+                      {previousExpenses.toFixed(2)} грн.
+                    </div>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold">
-                  {calculateTotal().toFixed(2)} грн.
+              )}
+
+              {/* Total Section */}
+              <div className="mt-6 flex justify-end">
+                <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white p-4 rounded-lg shadow-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Calculator size={18} />
+                    <span className="text-sm font-medium">
+                      Сумма на конец дня
+                    </span>
+                  </div>
+                  <div className="text-2xl font-bold">
+                    {calculateTotal().toFixed(2)} грн.
+                  </div>
                 </div>
               </div>
             </div>
@@ -347,7 +376,7 @@ function AppForm() {
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 hover:cursor-pointer"
               >
                 {isLoading ? (
                   <>
