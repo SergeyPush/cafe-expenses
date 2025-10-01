@@ -132,7 +132,7 @@ function AppForm() {
 
       if (response.ok) {
         alert(
-          `Daily report sent successfully!\nTotal expenses: ${calculateTotal().toFixed(
+          `Репорт успешно отправлен!\nОбщий расход: ${calculateTotal().toFixed(
             2
           )}`
         );
