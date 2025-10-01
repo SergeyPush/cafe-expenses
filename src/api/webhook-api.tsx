@@ -1,4 +1,6 @@
-const webhookUrlGet = import.meta.env.VITE_PROD_WEBHOOK_GET_URL;
+const webhookUrlGet = import.meta.env.DEV
+  ? import.meta.env.VITE_DEV_WEBHOOK_GET_URL
+  : import.meta.env.VITE_PROD_WEBHOOK_GET_URL;
 
 export const fetchPreviousExpenses = async () => {
   try {
@@ -7,8 +9,7 @@ export const fetchPreviousExpenses = async () => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const data = await response.json();
-    return data[0].previous_income || 0;
-    console.log("Previous expenses fetched:", data[0].previous_income);
+    return data[0].previous_income || null;
   } catch (error) {
     console.error("Error fetching previous expenses:", error);
   }

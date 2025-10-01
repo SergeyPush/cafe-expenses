@@ -26,7 +26,7 @@ function AppForm() {
   useEffect(() => {
     const loadPreviousExpenses = async () => {
       const previous = await fetchPreviousExpenses();
-      setPreviousExpenses(previous || 0);
+      setPreviousExpenses(previous || null);
     };
 
     loadPreviousExpenses();
