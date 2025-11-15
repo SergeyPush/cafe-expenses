@@ -1,4 +1,4 @@
 {
-  "installCommand": "npm ci --include=optional",
+  "installCommand": "npm install --no-optional=false",
   "buildCommand": "npm run build"
 }
