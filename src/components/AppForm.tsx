@@ -33,20 +33,20 @@ function AppForm() {
   }, []);
 
   const categories = [
-    "Закупка Продуктов",
-    "Закупка Дессертов",
+    "Закупка Продуктів",
+    "Закупка Десертів",
     "Закупка Молока",
-    "Закупка Кофе",
-    "Закупка Посуды",
+    "Закупка Кави",
+    "Закупка Посуду",
     "ЗП, Відсоток",
-    "Сендвичи, Салаты",
+    "Сендвічі, Салати",
     "Горішки, Брауні",
-    "Такси",
+    "Таксі",
     "Вода",
-    "Аренда",
+    "Оренда",
     "Реклама",
-    "Коммуналка",
-    "Прочее",
+    "Комуналка",
+    "Інше",
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -56,7 +56,7 @@ function AppForm() {
   const addExpenseRow = () => {
     const newExpense = {
       id: Date.now(),
-      category: "Закупка Продуктов",
+      category: "Закупка Продуктів",
       description: "",
       amount: "",
     };
@@ -100,7 +100,7 @@ function AppForm() {
       !parseFloat(formData.dailyIncome) ||
       !parseFloat(formData.startingCash)
     ) {
-      alert("Нужно заполнить все поля!");
+      alert("Потрібно заповнити всі поля!");
       return;
     }
 
@@ -129,7 +129,7 @@ function AppForm() {
 
       if (response.ok) {
         alert(
-          `Репорт успешно отправлен!\nОбщий расход: ${calculateTotal().toFixed(
+          `Звіт успішно відправлено!\nЗагальна сума: ${calculateTotal().toFixed(
             2
           )}`
         );
@@ -167,20 +167,20 @@ function AppForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Дата Отчета
+                  Дата Звіту
                 </label>
                 <input
                   type="date"
                   value={formData.date}
                   onChange={(e) => handleInputChange("date", e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                   required
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Сумма на начало дня
+                  Сума на початок дня
                 </label>
                 <div className="relative">
                   <input
@@ -192,7 +192,7 @@ function AppForm() {
                     placeholder="0.00"
                     step="0.01"
                     min="0"
-                    className="w-full px-2 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                    className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                     required
                   />
                 </div>
@@ -200,7 +200,7 @@ function AppForm() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 mt-4">
-                Приход за день грн.
+                Прихід за день грн.
               </label>
               <div className="relative">
                 <input
@@ -212,7 +212,7 @@ function AppForm() {
                   placeholder="0.00"
                   step="0.01"
                   min="0"
-                  className="w-full px-2 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                  className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                   required
                 />
               </div>
@@ -222,13 +222,13 @@ function AppForm() {
           {/* Expenses Section */}
           <div className="p-3 sm:p-5">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3">
-              <h2 className="text-lg font-semibold text-gray-800">Расход</h2>
+              <h2 className="text-lg font-semibold text-gray-800">Витрати</h2>
               <button
                 onClick={addExpenseRow}
                 className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-600 text-white text-sm sm:text-base rounded-lg hover:bg-green-700 transition-colors shadow-sm cursor-pointer w-full sm:w-auto justify-center"
               >
                 <Plus size={18} />
-                Добавить расход
+                Додати витрату
               </button>
             </div>
 
@@ -239,13 +239,13 @@ function AppForm() {
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="px-2 sm:px-3 py-2 sm:py-3 text-left text-xs sm:text-sm font-semibold text-gray-700 w-3/12">
-                        Категория
+                        Категорія
                       </th>
                       <th className="px-2 sm:px-3 py-2 sm:py-3 text-left text-xs sm:text-sm font-semibold text-gray-700 w-6/12">
-                        Описание
+                        Опис
                       </th>
                       <th className="px-2 sm:px-3 py-2 sm:py-3 text-left text-xs sm:text-sm font-semibold text-gray-700 w-2/12">
-                        Сумма
+                        Сума
                       </th>
                       <th className="px-1 sm:px-2 py-2 sm:py-3 text-center text-xs sm:text-sm font-semibold text-gray-700 w-1/12"></th>
                     </tr>
@@ -286,7 +286,7 @@ function AppForm() {
                                 e.target.value
                               )
                             }
-                            placeholder="Описание..."
+                            placeholder="Опис..."
                             className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                           />
                         </td>
@@ -332,7 +332,7 @@ function AppForm() {
                   <div className="flex items-center gap-2 mb-1">
                     <Calculator size={16} className="sm:w-[18px] sm:h-[18px]" />
                     <span className="text-xs sm:text-sm font-medium">
-                      Сумма за вчерашний день
+                      Сума за вчорашній день
                     </span>
                   </div>
                   <div className="text-xl sm:text-2xl font-bold">
@@ -346,7 +346,7 @@ function AppForm() {
                 <div className="flex items-center gap-2 mb-1">
                   <Calculator size={16} className="sm:w-[18px] sm:h-[18px]" />
                   <span className="text-xs sm:text-sm font-medium">
-                    Сумма на конец дня
+                    Сума на кінець дня
                   </span>
                 </div>
                 <div className="text-xl sm:text-2xl font-bold">
@@ -365,10 +365,10 @@ function AppForm() {
                 {isLoading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Отправляем отчет...
+                    Відправляємо звіт...
                   </>
                 ) : (
-                  "Отправить отчет"
+                  "Відправити звіт"
                 )}
               </button>
               <button
@@ -377,7 +377,7 @@ function AppForm() {
                 className="px-8 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:cursor-pointer"
               >
                 <Trash2 size={18} />
-                Очистить форму
+                Очистити форму
               </button>
             </div>
           </div>
